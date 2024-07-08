@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  db:
+    image: mysql:8.0-debian
+    container_name: meusite
+    tty: true
+    environment:
+       - MYSQL_DATABASE=meusite
+       - MYSQL_ROOT_PASSWORD=ishow123
+    ports:
+      - 3306:3306
+
+    volumes:
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/1.sql
