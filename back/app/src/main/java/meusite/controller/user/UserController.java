@@ -34,14 +34,11 @@ public class UserController {
     UserService aService = new UserService(aGateGay);
 
     @PostMapping("/register")
-    public ResponseEntity<String> userRegister(@RequestBody RegisterRequestDto registerRequestDto){
+    public ResponseEntity<RegisterResponseDto> userRegister(@RequestBody RegisterRequestDto registerRequestDto){
 
-        var userid  = aService.createUser(registerRequestDto);
+        aService.createUser(registerRequestDto);
 
-        if(!userid.isEmpty()){
-            return ResponseEntity.ok().body(userid);
-        }
-        return ResponseEntity.ok().body("User ja esta registrado !");
+        return ResponseEntity.ok().body(new RegisterResponseDto("Usuario registrado com sucesso, "));
     }
 
     @PostMapping("/login")
@@ -106,5 +103,19 @@ public class UserController {
 
         return ResponseEntity.ok().body(new GetUserDataResponseDto(userFormated.email(), userFormated.password(), userFormated.created_at()));
     }
+
+    @PostMapping("/changepassword")
+    public ResponseEntity<ChangePasswordResponseDto> changeUserPassword(
+            @RequestBody ChangePasswordRequestDto requestDto, @RequestHeader("Authorization")String header){
+
+        var token = header.substring(7);
+
+        var userEmail = this.aAuthService.extractSubject(token);
+
+        return ResponseEntity.ok().body(new ChangePasswordResponseDto(
+                aService.ChangePassword(userEmail, requestDto.password(), requestDto.newpassword())));
+    }
+
+
 
 }

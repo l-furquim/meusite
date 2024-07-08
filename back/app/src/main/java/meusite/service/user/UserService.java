@@ -8,6 +8,8 @@ import meusite.repository.user.exception.UserException;
 import meusite.repository.user.jpa.UserJpaEntity;
 import meusite.service.auth.exception.AuthException;
 import meusite.service.exception.ServiceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -42,7 +44,7 @@ public class UserService {
         userJpaGateWay.save(userJpaEntity);
     }
 
-    public String createUser(RegisterRequestDto registerRequestDto){
+    public void createUser(RegisterRequestDto registerRequestDto){
         passwordEncoder = new BCryptPasswordEncoder();
 
 
@@ -52,11 +54,11 @@ public class UserService {
 
         ZonedDateTime zonedDateTime = instant.atZone(zoneId);
 
-        if(this.isUserAlredyRegister(registerRequestDto.email(),registerRequestDto.password()).isPresent()){
-            throw new ServiceException("Ja existe um usuario com este email !");
+        if(this.findUserByEmail(registerRequestDto.email()).isPresent()){
+            throw new AuthException("Ja existe um usuario com este email !");
         }
         if(registerRequestDto.email().isEmpty() || registerRequestDto.password().isEmpty()){
-            throw new ServiceException("Voce nao pode criar um usuario com senha ou email vazios !");
+            throw new AuthException("Voce nao pode criar um usuario com senha ou email vazios !");
         }
 
         var anUser = new User(
@@ -73,7 +75,7 @@ public class UserService {
         }catch(OptimisticLockingFailureException e) {
             throw new UserException((e.getMessage()));
         }
-        return userEntity.getId();
+
     }
 
     public Optional<UserJpaEntity> findUserByPassword( String password){
@@ -82,10 +84,10 @@ public class UserService {
 
     public Optional<UserJpaEntity> findUserByEmail(final String email){
         var user = userJpaGateWay.findByEmail(email);
-        if(user.isEmpty()) {
-            throw new ServiceException("nao foi possivel encontrar o usuario ! " + email);
+        if(user.isPresent()) {
+            return user;
         }
-        return user;
+        return Optional.empty();
     }
 
     public void updateUserEmailById(final String id, final String email){
@@ -93,13 +95,6 @@ public class UserService {
         anUser.get().setEmail(email);
     }
 
-    public Optional<UserJpaEntity> isUserAlredyRegister(String email, String password){
-        var anUser = this.findUserByEmail(email);
-        if(anUser.isPresent()){
-            return anUser;
-        }
-        return Optional.empty();
-    }
     public boolean loginCredentialsValidate(String email, String password){
         var aUser = this.findUserByEmail(email);
 
@@ -119,6 +114,23 @@ public class UserService {
         return UserJpaEntity.toModel(userJpaEntity);
     }
 
+    public String ChangePassword(String email, String password,String newPassword) {
+        var anUser = this.findUserByEmail(email).get();
 
+        Logger logger = LoggerFactory.getLogger(UserService.class);
+
+
+
+        if(passwordEncoder.matches(password, anUser.getPassword())){
+            var passwordEncoded = passwordEncoder.encode(newPassword);
+
+            this.userJpaGateWay.changePassword(email, passwordEncoded);
+
+            logger.info(anUser.getPassword());
+            return "Senha alterada com sucesso !";
+        }
+        throw new AuthException("Senha incorreta!");
+        
+    }
 
 }

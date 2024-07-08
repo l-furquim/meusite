@@ -37,5 +37,9 @@ public class UserJpaGateWay {
         return userJpaRepository.findById(id);
     }
 
+    public void changePassword(String email, String newPassword){
+        this.userJpaRepository.changeUserPassword(email, newPassword);
+    }
+
 
 }
