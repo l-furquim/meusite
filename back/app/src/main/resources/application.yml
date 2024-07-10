@@ -7,3 +7,14 @@ spring:
   jpa:
     show-sql: true
     open-in-view: false
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: furquimmsw@gmail.com
+    password: eimm majm mxfb fdcm
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true

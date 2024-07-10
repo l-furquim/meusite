@@ -1,12 +1,15 @@
 package meusite.repository.post;
 
 import meusite.controller.post.dto.EditPostDtoRequest;
+import meusite.controller.post.dto.FeedPostDtoResponse;
 import meusite.repository.post.jpa.PostJpaEntity;
 import meusite.repository.post.jpa.PostJpaRepository;
 import meusite.repository.user.UserJpaGateWay;
 import meusite.repository.user.jpa.UserJpaEntity;
 import meusite.repository.user.jpa.UserJpaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -48,5 +51,13 @@ public class PostJpaGateWay {
     }
     public List<PostJpaEntity> getAllPosts(){
         return this.postJpaRepository.findAll();
+    }
+
+    public List<PostJpaEntity> getLimitedPosts(Integer number){
+        return this.postJpaRepository.findLimitedNumberOfPosts(number);
+    }
+
+    public Page<PostJpaEntity> findAll(Pageable number){
+        return this.findAll(number);
     }
 }

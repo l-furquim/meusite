@@ -19,4 +19,9 @@ public interface UserJpaRepository extends JpaRepository<UserJpaEntity, String> 
     @Query("UPDATE UserJpaEntity e SET e.password = :novaSenha WHERE e.email = :email")
     void changeUserPassword(@Param("email") String email, @Param("novaSenha") String novaSenha);
 
+
+    @Transactional
+    @Modifying
+    @Query("UPDATE UserJpaEntity e SET e.id = :newId WHERE e.email = :email")
+    void changeUserId(@Param("email") String email, @Param("newId") String newId);
 }

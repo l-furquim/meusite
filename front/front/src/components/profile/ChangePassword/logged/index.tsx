@@ -19,6 +19,7 @@ import { useContext, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Router } from "lucide-react";
 import { CustomAlert, CustomAlertType } from "@/components/general/customalert";
+import { ChangePasswordResponseType } from "@/app/api/user/password/logged/route";
 
 
 const InsertPasswordChangeSchema = z.object({
@@ -29,9 +30,11 @@ const InsertPasswordChangeSchema = z.object({
 type InsertPasswordChangeType= z.infer<typeof InsertPasswordChangeSchema>;
 
 
-export  function ChangePasswordForm() {
+export  function ChangePasswordLoggedForm() {
     
-    const [insertMessage, setInsertMEssage] = useState<JSX.Element>(<></>);
+   
+  
+  const [insertMessage, setInsertMEssage] = useState<JSX.Element>(<></>);
    
     const insertPost = useForm<InsertPasswordChangeType>({
         resolver: zodResolver(InsertPasswordChangeSchema),
@@ -47,12 +50,28 @@ export  function ChangePasswordForm() {
     
     try{
 
-        const result = await frontEndApi.post("user/password", JSONdata);
+        const result = await frontEndApi.post("user/password/logged", JSONdata);
 
-        setInsertMEssage(<><CustomAlert title="Sucesso !"msg="senha alterada" type={CustomAlertType.SUCESS} /></>);
+        const {response, errormessage} = result.data as ChangePasswordResponseType;
 
+        if(response){
+          setInsertMEssage(<><CustomAlert title="Sucesso !"msg="senha alterada" type={CustomAlertType.SUCESS} /></>);
+
+          location.reload();
+
+        }else{
+          const message = <CustomAlert type={CustomAlertType.ERROR}
+          title= "Erro ao alterar a senha:"
+          msg = {errormessage || "ERRO DESCONHECIDO!"}/>;
+          setInsertMEssage(message);
+          }
 
     }catch(e){
+      const axiosError = e as AxiosError;
+    const message = <CustomAlert type={CustomAlertType.ERROR}
+    title= "Erro ao logar-se !"
+    msg = {axiosError.message}/>;
+    setInsertMEssage(message);
 
     }
 
@@ -112,7 +131,7 @@ export  function ChangePasswordForm() {
       }
       />
         
-          <Button type="submit">Postar</Button>
+          <Button type="submit">Mudar</Button>
           </form>
           {insertMessage}
       </Form>

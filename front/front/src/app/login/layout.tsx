@@ -15,6 +15,8 @@ import { AuthContext } from "@/context/auth-context";
 import { useRouter } from "next/navigation";
 import React, { useState } from 'react';
 import { Redirect } from 'react-router-dom';
+import { ChangePasswordNotLoggedForm } from "@/components/profile/ChangePassword/not-logged";
+import { CodeVerifier } from "@/components/profile/ChangePassword/not-logged/verifier";
 
 const LoginFormSchema = z.object({
     email: z.string().email({message: "Email invalido !"}),
@@ -60,7 +62,7 @@ try{
         
         
 
-        router.push("/home");
+        setTimeout(() => router.push("/home/0"), 1000);
     
     }else{
     const message = <CustomAlert type={CustomAlertType.ERROR}
@@ -129,6 +131,9 @@ try{
        
             </form>
         </Form>
+        <CodeVerifier onClose={function (): void {
+                        throw new Error("Function not implemented.");
+                    } }></CodeVerifier>
     </div>
 </div>
         

@@ -13,6 +13,7 @@ import meusite.repository.post.jpa.PostJpaRepository;
 import meusite.repository.user.jpa.UserJpaRepository;
 import meusite.service.post.PostService;
 import meusite.service.user.UserService;
+import org.apache.catalina.connector.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -83,4 +84,14 @@ public class PostController {
 
     }
 
+    @GetMapping("post/feed?page={pageNumber}")
+    public ResponseEntity<List<FeedPostDtoResponse>> getLimitedFeed(@PathVariable("pageNumber") Integer pageNumber){
+
+
+
+
+        var posts = postService.getPostsInRange(pageNumber * 20, (pageNumber * 20) + 20);
+
+        return ResponseEntity.ok().body(posts);
+    }
 }

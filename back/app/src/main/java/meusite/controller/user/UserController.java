@@ -4,9 +4,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import meusite.controller.exception.handler.body.ExceptionResponseBody;
 import meusite.controller.user.dto.*;
 import meusite.repository.user.UserJpaGateWay;
+import meusite.repository.user.exception.UserException;
 import meusite.repository.user.jpa.UserJpaEntity;
 import meusite.repository.user.jpa.UserJpaRepository;
 import meusite.service.auth.AuthService;
+import meusite.service.auth.EmailService;
+import meusite.service.exception.ServiceException;
 import meusite.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
@@ -16,6 +19,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.security.auth.login.LoginException;
+import java.util.Random;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/user")
@@ -32,6 +37,7 @@ public class UserController {
 
     @Autowired
     UserService aService = new UserService(aGateGay);
+
 
     @PostMapping("/register")
     public ResponseEntity<RegisterResponseDto> userRegister(@RequestBody RegisterRequestDto registerRequestDto){
@@ -104,8 +110,8 @@ public class UserController {
         return ResponseEntity.ok().body(new GetUserDataResponseDto(userFormated.email(), userFormated.password(), userFormated.created_at()));
     }
 
-    @PostMapping("/changepassword")
-    public ResponseEntity<ChangePasswordResponseDto> changeUserPassword(
+    @PostMapping("/changepassword/logged")
+    public ResponseEntity<ChangePasswordResponseDto> changeUserLoggedPassword(
             @RequestBody ChangePasswordRequestDto requestDto, @RequestHeader("Authorization")String header){
 
         var token = header.substring(7);
@@ -115,6 +121,25 @@ public class UserController {
         return ResponseEntity.ok().body(new ChangePasswordResponseDto(
                 aService.ChangePassword(userEmail, requestDto.password(), requestDto.newpassword())));
     }
+    @PostMapping("/changepassword/notlogged")
+    public ResponseEntity<ChangePasswordResponseDto> changeUserNotLoggedPassword(
+            @RequestBody ChangePasswordNotLoggedRequestDto requestDto){
+
+        return ResponseEntity.ok().body(new ChangePasswordResponseDto(
+                aService.ChangePasswordNotLoggedEmail(requestDto.email())));
+    }
+
+
+    @PostMapping("/password/verifiercode")
+    public ResponseEntity<ChangePasswordNotLoggedrReponseDto> verfierCode(@RequestBody VerifierCodeRequestDto requestDto){
+        var user = aService.verifierCode(requestDto.code());
+
+
+        return ResponseEntity.ok().body(
+                new ChangePasswordNotLoggedrReponseDto(this.aService.ChangePasswordNotLogged(user,requestDto.newpassword())));
+    }
+
+
 
 
 

@@ -2,7 +2,7 @@
 import { frontEndApi } from "@/lib/api"
 import { AxiosError } from "axios";
 import { useEffect, useState } from "react";
-import { ChangePasswordForm } from "./button/password-button";
+import { ChangePasswordLoggedForm } from "./ChangePassword/logged";
 
 export type ProfileDataType = {
     email : string,
@@ -36,7 +36,7 @@ useEffect(() => {
 
             <>    
                 <p className="container p-2 shadow-md">Email: {`${userData.email}`}</p>
-                <p className="container space-x-10 flex-row  p-2 shadow-md">Senha  <ChangePasswordForm></ChangePasswordForm></p>
+                <p className="container space-x-10 flex-row  p-2 shadow-md">Senha  <ChangePasswordLoggedForm></ChangePasswordLoggedForm></p>
                 <p className="container p-2 shadow-md ">Data de criação da conta : {userData.created_at}</p>
             
             </>
@@ -70,7 +70,7 @@ async function ProfilePageData() : Promise<ProfileDataType>{
     }catch(e){
         const axiosError = e as AxiosError;
 
-        console.log(axiosError.message, axiosError.response?.status);
+        
         throw axiosError;
     }
     

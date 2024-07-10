@@ -41,5 +41,11 @@ public class UserJpaGateWay {
         this.userJpaRepository.changeUserPassword(email, newPassword);
     }
 
+    public void changeId(String email, String newId){
+        this.userJpaRepository.changeUserId(email,newId);
+    }
+
+
+
 
 }

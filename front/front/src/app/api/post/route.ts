@@ -1,9 +1,9 @@
 import { backendApi } from "@/lib/api"
-import { AxiosError, CreateAxiosDefaults } from "axios"
+import axios, { AxiosError, CreateAxiosDefaults } from "axios"
 import { NextRequest } from "next/server"
 import { BackendLoginResponseType } from "../user/login/route"
 
-type BackendPostErrorType = {
+export type BackendPostErrorType = {
     message : string,
     status: number,
     uri : string
@@ -62,10 +62,9 @@ export async function POST(request: NextRequest) {
         const { status, message } = axiosError.response?.data as BackendPostErrorType;
 
         if (status) {
-            return new Response(JSON.stringify(new AxiosError(message, status.toString())), { status });
+            return new Response(JSON.stringify(new Error(message)), { status });
         } else {
-            return new Response(JSON.stringify(new AxiosError(axiosError.message, axiosError.code)),
-                { status: axiosError.status || 500 });
+            return new Response(JSON.stringify(new Error(axiosError.message)), { status: axiosError.response?.status || 500 });
         }
     }
 }
@@ -83,25 +82,34 @@ export async function GET(request: NextRequest) {
             }
         });
 
-        const posts = result.data as PostsType;
-
-        
-
-        return new Response(JSON.stringify(posts), {status: 200});
+        const posts = result.data
 
 
+        //const postPage = posts.posts.slice(0, 20);
+
+        return new Response(JSON.stringify(posts.slice(0,20)), { status: 200 });
 
     }catch(e){
+        console.error("Erro na requisição GET para /api/post:", e);
+
+        if (axios.isAxiosError(e)) {
         const axiosError = e as AxiosError;
 
-        const { status, message } = axiosError.response?.data as BackendPostErrorType;
+        if (axiosError.response) {
+            const responseData = axiosError.response.data;
 
-        if (status) {
-            return new Response(JSON.stringify(new AxiosError(message, status.toString())), { status });
-        } else {
-            return new Response(JSON.stringify(new AxiosError(axiosError.message, axiosError.code)),
-                { status: axiosError.status || 500 });
+            if (responseData && typeof responseData === "object") {
+                const { status, message } = responseData as BackendPostErrorType;
+
+                if (status && message) {
+                    return new Response(JSON.stringify({ error: message }), { status });
+                }
+            }
+
+            return new Response(JSON.stringify({ error: axiosError.message }), { status: axiosError.response.status || 500 });
         }
     }
 
+    return new Response(JSON.stringify({ error: "Erro interno no servidor" }), { status: 500 });
+    }
 }

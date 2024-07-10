@@ -51,7 +51,7 @@ async function onInsertPost({content}: InsertPostType){
     try{
         const result = await frontEndApi.post("/post", formatedData);
 
-        console.log("Inserido com sucesso");
+        
         setInsertMEssage(<><CustomAlert title="Sucesso !"msg="post criado" type={CustomAlertType.SUCESS} /></>);
         location.reload();
         
@@ -59,7 +59,7 @@ async function onInsertPost({content}: InsertPostType){
     }catch(e){
         const axiosError = e as AxiosError;
 
-        console.log(axiosError.message, axiosError.response?.status);
+       
 
         setInsertMEssage(<>deu ruim!</>);
 

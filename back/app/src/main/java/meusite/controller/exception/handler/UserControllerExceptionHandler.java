@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-@ControllerAdvice("meusite.controller.post")
+@ControllerAdvice("meusite.controller.user")
 public class UserControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value = { UserException.class})

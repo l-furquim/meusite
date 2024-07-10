@@ -21,6 +21,7 @@ export default function RootLayout({
   return (
     <AuthContextProvider>
     <html lang="pt-BR">
+    <link rel="icon" href="https://images.tcdn.com.br/img/img_prod/460977/pelucia_guaxinim_cinza_e_marrom_grande_50cm_32497_1_20201211162123.jpeg" />
       <body className={cn(poppins.className, "bg-zinc-500")}>{children}</body>
     </html>
     </AuthContextProvider>

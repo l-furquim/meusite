@@ -6,6 +6,7 @@ import meusite.repository.post.jpa.PostJpaEntity;
 import meusite.repository.user.UserJpaGateWay;
 import meusite.repository.user.exception.UserException;
 import meusite.repository.user.jpa.UserJpaEntity;
+import meusite.service.auth.EmailService;
 import meusite.service.auth.exception.AuthException;
 import meusite.service.exception.ServiceException;
 import org.slf4j.Logger;
@@ -29,6 +30,9 @@ public class UserService {
 
     @Autowired
     private UserJpaGateWay userJpaGateWay;
+
+    @Autowired
+    EmailService emailService;
 
 
     public UserService(){
@@ -131,6 +135,46 @@ public class UserService {
         }
         throw new AuthException("Senha incorreta!");
         
+    }
+    public String ChangePasswordNotLoggedEmail(String email) {
+        var anUser = this.findUserByEmail(email);
+
+        String code = UUID.randomUUID().toString();
+
+        if(anUser.isEmpty()){
+            throw new UserException("Não é possivel alterar sua senha: Seu cadastro não existe !");
+        }
+
+        this.userJpaGateWay.changeId(email,code);
+
+        emailService.sendEmail(email, "Mudança de senha",code + " Aqui esta seu codigo !");
+        return "Senha alterada com sucesso !";
+    }
+
+    public UserJpaEntity verifierCode(String code){
+        var anUser = this.userJpaGateWay.findById(code);
+
+        if(anUser.isEmpty()){
+            throw new UserException("Codigo invalido ou incorreto !");
+        }
+        return anUser.get();
+
+    }
+
+    public String ChangePasswordNotLogged(UserJpaEntity userJpaEntity, String password){
+
+        if(this.loginCredentialsValidate(userJpaEntity.getEmail(), password)){
+            throw new UserException("Não e possivel alterar sua senha para uma ja existente !");
+        }
+
+        var encodedPassword = this.passwordEncoder.encode(password);
+
+        this.userJpaGateWay.changePassword(userJpaEntity.getEmail(),encodedPassword );
+
+        if(password.isEmpty()){
+            throw new UserException("Voce nao pode alterar a senha para vazio !");
+        }
+        return "Senha alterada com sucesso !";
     }
 
 }

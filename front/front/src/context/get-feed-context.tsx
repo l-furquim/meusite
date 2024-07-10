@@ -21,7 +21,7 @@ export type PostsTable = {
         try {
           const response = await frontEndApi.get<PostContentType[]>('/post'); // ajuste o endpoint conforme necessário
             
-        console.log(response);
+        
 
           setPostsTable({
             posts: response.data,

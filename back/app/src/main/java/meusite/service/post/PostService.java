@@ -14,6 +14,8 @@ import meusite.service.auth.AuthService;
 import meusite.service.exception.ServiceException;
 import meusite.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.sql.Time;
@@ -83,4 +85,20 @@ public class PostService {
             return ob.stream().map(post -> PostJpaEntity.toModel(post)).collect(Collectors.toList());
 
     }
+
+    public List<FeedPostDtoResponse> getLimitedPosts(Integer number) {
+        var list =  this.postJpaGateWay.getLimitedPosts(number);
+
+        return list.stream().map(ob -> PostJpaEntity.toModel(ob)).collect(Collectors.toList());
+    }
+    public List<FeedPostDtoResponse> getPostsInRange(int start, int size) {
+        PageRequest pageRequest = PageRequest.of(start / size, size);
+        Page<PostJpaEntity> page = this.postJpaGateWay.findAll(pageRequest);
+
+        var list = page.getContent();
+
+        return list.stream().map(posts -> PostJpaEntity.toModel(posts)).collect(Collectors.toList());
+    }
+
+
 }

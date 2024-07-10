@@ -1,6 +1,9 @@
 package meusite.repository.post.jpa;
 
 import meusite.repository.user.jpa.UserJpaEntity;
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -27,5 +30,11 @@ public interface PostJpaRepository extends JpaRepository<PostJpaEntity,Long> {
     @Query("SELECT p FROM PostJpaEntity p")
     List<PostJpaEntity> findAllPostData();
 
+
+    @Query(value = "SELECT * FROM post_table LIMIT :limit", nativeQuery = true)
+    List<PostJpaEntity> findLimitedNumberOfPosts(@Param("limit") int limit);
+
+
+    Page<PostJpaEntity> findAll(Pageable pageable);
 
 }

@@ -14,7 +14,7 @@ type ListaPostsProps = {
         <ul>
           {posts.map(post => (
             <li className="container mt-5 flex-col flex space-y-4 max-w-screen-md pb-10 bg-gray-700 rounded-md border-stone-950 border-2">
-              <a href={`/profile/view/${post.userEmail}`}>
+              <a href={`/profile/${post.userEmail}`}>
               <strong className="font-bold mt-2 mr-40">{post.userEmail}</strong>
               </a>
               <p className=" text-slate-300">{post.content}</p>
