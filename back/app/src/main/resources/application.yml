@@ -1,4 +1,5 @@
 spring:
+  sql:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/meusite
@@ -10,8 +11,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: furquimmsw@gmail.com
-    password: eimm majm mxfb fdcm
+    username: meusitewebmail@gmail.com
+    password: cwmz kiro oyhy swxu
     properties:
       mail:
         smtp:

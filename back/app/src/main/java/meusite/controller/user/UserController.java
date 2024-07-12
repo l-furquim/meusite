@@ -3,10 +3,13 @@ package meusite.controller.user;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import meusite.controller.exception.handler.body.ExceptionResponseBody;
 import meusite.controller.user.dto.*;
+import meusite.domain.enums.AccountStatus;
 import meusite.repository.user.UserJpaGateWay;
 import meusite.repository.user.exception.UserException;
 import meusite.repository.user.jpa.UserJpaEntity;
 import meusite.repository.user.jpa.UserJpaRepository;
+import meusite.repository.verifier.jpa.UserVerifierJpaEntity;
+import meusite.repository.verifier.jpa.UserVerifierRepository;
 import meusite.service.auth.AuthService;
 import meusite.service.auth.EmailService;
 import meusite.service.exception.ServiceException;
@@ -71,15 +74,15 @@ public class UserController {
 
         return ResponseEntity.badRequest().build();
     }
-    @PostMapping("/login/validate")
+    @PostMapping("/login/validateToken")
     public ResponseEntity<ValidateLoginDtoResponse> validateLogin(@RequestBody ValidateLoginDtoRequest validateLoginDtoRequest){
-        var atoken = aAuthService.validateToken(validateLoginDtoRequest.token());
+        var aSubject = aAuthService.validateToken(validateLoginDtoRequest.token());
+
 
         var isValid = false;
 
-        if(!atoken.isBlank()){
+        if(!aSubject.isBlank()){
             isValid = true;
-
         }
         return ResponseEntity.ok().body(new ValidateLoginDtoResponse(isValid));
 
@@ -138,6 +141,22 @@ public class UserController {
         return ResponseEntity.ok().body(
                 new ChangePasswordNotLoggedrReponseDto(this.aService.ChangePasswordNotLogged(user,requestDto.newpassword())));
     }
+
+    @PostMapping("/register/validate")
+    public ResponseEntity<ChangePasswordNotLoggedrReponseDto> verifierLogin(@RequestBody VerifierLoginRequestDto verifierLoginRequestDto){
+
+        return ResponseEntity.ok().body(
+                new ChangePasswordNotLoggedrReponseDto(this.aService.validateRegister(verifierLoginRequestDto.code())));
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<DeleteProfileResponseDto> deleteProfile(@RequestHeader("Authorization")String header){
+
+        var token = header.substring(7);
+
+        return ResponseEntity.ok().body(new DeleteProfileResponseDto(this.aAuthService.deleteUser(token)));
+    }
+
 
 
 

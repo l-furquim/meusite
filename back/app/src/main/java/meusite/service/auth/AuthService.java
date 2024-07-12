@@ -75,7 +75,7 @@ public class AuthService implements UserDetailsService {
 
             return aSubject;
         } catch (Exception e) {
-            throw new AuthException("Token invalido!" + aToken);
+            throw new AuthException("Token invalido! " + aToken + e.getMessage());
     }
     }
     @Override
@@ -99,6 +99,10 @@ public class AuthService implements UserDetailsService {
         }
         var aUser = aService.findUserByEmail(loginRequest.email());
 
+        if(aUser.get().getStatus().getDescription().equals("pending")){
+            throw new AuthException("Voce nao pode se logar, verificação de email esta pendente!");
+        }
+
         var token =  this.createToken(aUser.get());
 
         return new LoginResponseDto(token);
@@ -116,5 +120,34 @@ public class AuthService implements UserDetailsService {
 
     public String extractSubject(String token){
         return this.validateToken(token);
+    }
+
+    public String deleteUser(String token){
+        try{
+            final var anAlgorithm = Algorithm.HMAC256(TOKEN_SECRET);
+
+            final var aVerifier = JWT.require(anAlgorithm)
+                    .withIssuer(TOKEN_ISSUER)
+                    .build();
+
+            final var aDecodedToken = aVerifier.verify(token);
+
+            var userEmail = aDecodedToken.getSubject();
+
+            if(userEmail.isBlank()){
+                throw new AuthException("este codigo não esta connectado a nenhum email !");
+            }
+
+            var user = this.userService.findUserByEmail(userEmail);
+
+            if(user.isPresent()){
+                this.userService.delete(user.get());
+                return "Usuario excluido com sucesso";
+            }else {
+                throw new AuthException("Token invalido para deleção!");
+            }
+         } catch (Exception e) {
+            throw new AuthException("Esta conta ja não existe mais");
+        }
     }
 }

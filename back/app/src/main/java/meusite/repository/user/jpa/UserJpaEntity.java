@@ -1,11 +1,9 @@
 package meusite.repository.user.jpa;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import meusite.controller.user.dto.GetUserModelDto;
 import meusite.domain.User.User;
+import meusite.domain.enums.AccountStatus;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -35,6 +33,10 @@ public class UserJpaEntity implements UserDetails {
     @Column(name="created_at", nullable = false)
     private Instant createdAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name="status" ,nullable=false)
+    private AccountStatus status;
+
     public UserJpaEntity(){
 
     }
@@ -46,12 +48,31 @@ public class UserJpaEntity implements UserDetails {
         this.createdAt = createdAt;
     }
 
+    public UserJpaEntity(String id, String email, String password, Instant createdAt, AccountStatus status) {
+        this.id = id;
+        this.email = email;
+        this.password = password;
+        this.createdAt = createdAt;
+        this.status = status;
+    }
+
     public static UserJpaEntity from(final User user){
         return new UserJpaEntity(
                 user.getId(),
                 user.getEmail(),
                 user.getPassword(),
-                user.getCreatedAt()
+                user.getCreatedAt(),
+                user.getStatus()
+                );
+    }
+
+    public static UserJpaEntity fromWithRole(final User user){
+        return new UserJpaEntity(
+                user.getId(),
+                user.getEmail(),
+                user.getPassword(),
+                user.getCreatedAt(),
+                user.getStatus()
         );
     }
     public static GetUserModelDto toModel(UserJpaEntity userJpaEntity){
@@ -74,6 +95,12 @@ public class UserJpaEntity implements UserDetails {
                 formattedDateTime
 
         );
+    }
+    public void setStatus(AccountStatus status){
+        this.status = status;
+    }
+    public AccountStatus getStatus(){
+        return this.status;
     }
 
     public String getId() {

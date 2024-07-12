@@ -45,7 +45,9 @@ public class UserJpaGateWay {
         this.userJpaRepository.changeUserId(email,newId);
     }
 
-
+    public void delete(UserJpaEntity userJpaEntity){
+        this.userJpaRepository.delete(userJpaEntity);
+    }
 
 
 }

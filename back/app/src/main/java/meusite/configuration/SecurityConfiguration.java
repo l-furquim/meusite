@@ -29,11 +29,12 @@ public class SecurityConfiguration {
                 csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize.requestMatchers(HttpMethod.POST, "user/recoveryEmail").permitAll())
+                .authorizeHttpRequests(authorize -> authorize.requestMatchers(HttpMethod.POST, "user/register/validate").permitAll())
                 .authorizeHttpRequests(authorize -> authorize.requestMatchers(HttpMethod.POST, "user/changepassword/notlogged").permitAll())
                 .authorizeHttpRequests(authorize -> authorize.requestMatchers(HttpMethod.POST, "user/password/verifiercode").permitAll())
                 .authorizeHttpRequests(authorize -> authorize.requestMatchers(HttpMethod.POST, "user/register").permitAll())
                 .authorizeHttpRequests(authorize -> authorize.requestMatchers(HttpMethod.POST, "user/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "user/login/validate").permitAll()
+                        .requestMatchers(HttpMethod.POST, "user/login/validateToken").permitAll()
                         .anyRequest()
                         .authenticated())
                 .addFilterBefore(this.securityFilter,

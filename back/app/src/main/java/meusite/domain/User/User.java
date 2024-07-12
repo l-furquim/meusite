@@ -1,17 +1,15 @@
 package meusite.domain.User;
 
+import meusite.domain.enums.AccountStatus;
 import meusite.domain.exception.DomainException;
-import meusite.domain.post.Post;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 
 public class User {
     String email;
     String password;
     String id;
-
+    AccountStatus status;
     Instant createdAt;
 
     public User(){
@@ -23,8 +21,15 @@ public class User {
         this.email = email;
         this.password = password;
         this.createdAt = createdAt;
-
         this.Validate();
+    }
+
+    public User(String email, String password, String id, AccountStatus status, Instant createdAt) {
+        this.email = email;
+        this.password = password;
+        this.id = id;
+        this.status = status;
+        this.createdAt = createdAt;
     }
 
     public String getEmail() {
@@ -37,6 +42,10 @@ public class User {
 
     public String getId() {
         return id;
+    }
+
+    public AccountStatus getStatus(){
+        return status;
     }
 
 

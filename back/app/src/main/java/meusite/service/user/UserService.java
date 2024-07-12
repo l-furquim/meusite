@@ -2,13 +2,15 @@ package meusite.service.user;
 import meusite.controller.user.dto.GetUserModelDto;
 import meusite.controller.user.dto.RegisterRequestDto;
 import meusite.domain.User.User;
-import meusite.repository.post.jpa.PostJpaEntity;
+import meusite.domain.enums.AccountStatus;
 import meusite.repository.user.UserJpaGateWay;
 import meusite.repository.user.exception.UserException;
 import meusite.repository.user.jpa.UserJpaEntity;
+import meusite.repository.verifier.jpa.UserVerifierJpaEntity;
+import meusite.repository.verifier.jpa.UserVerifierRepository;
 import meusite.service.auth.EmailService;
 import meusite.service.auth.exception.AuthException;
-import meusite.service.exception.ServiceException;
+import meusite.service.verifier.UserVerifierService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +23,12 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class UserService {
+
+    @Autowired
+    UserVerifierService userVerifierService;
 
     private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -51,29 +55,29 @@ public class UserService {
     public void createUser(RegisterRequestDto registerRequestDto){
         passwordEncoder = new BCryptPasswordEncoder();
 
+        var aUser = this.findUserByEmail(registerRequestDto.email());
 
-        ZoneId zoneId = ZoneId.systemDefault();
-
-        Instant instant = Instant.now();
-
-        ZonedDateTime zonedDateTime = instant.atZone(zoneId);
-
-        if(this.findUserByEmail(registerRequestDto.email()).isPresent()){
+        if(aUser.isPresent()){
             throw new AuthException("Ja existe um usuario com este email !");
         }
         if(registerRequestDto.email().isEmpty() || registerRequestDto.password().isEmpty()){
             throw new AuthException("Voce nao pode criar um usuario com senha ou email vazios !");
         }
+        if(
+                this.userVerifierService.getUserVerifierByUserEmail(registerRequestDto.email()).isPresent() &&
+                        this.userVerifierService.getUserVerifierByUserEmail(registerRequestDto.email()).get().getExpires_at().compareTo(Instant.now()) >= 0 ){
+            throw  new AuthException("Seu codigo ainda nao expirou !");
+        }
 
-        var anUser = new User(
-                registerRequestDto.email(),passwordEncoder.encode(registerRequestDto.password()), UUID.randomUUID().toString(),Instant.from(zonedDateTime)
-        );
 
-        var userEntity = UserJpaEntity.from(anUser);
-
+        UserVerifierJpaEntity userVerifierJpaEntity = new UserVerifierJpaEntity(
+                registerRequestDto.email(), passwordEncoder.encode(registerRequestDto.password()), Instant.now().plusMillis(6000000),AccountStatus.PENDING,UUID.randomUUID().toString());
 
         try{
-            userJpaGateWay.save(userEntity);
+            userVerifierService.save(userVerifierJpaEntity);
+            emailService.sendEmail(
+                    registerRequestDto.email(),"Codigo para criação da conta!",
+                    "aqui esta seu codigo: " + userVerifierJpaEntity.getCode());
         }catch (IllegalArgumentException e){
             throw new UserException(e.getMessage());
         }catch(OptimisticLockingFailureException e) {
@@ -121,7 +125,7 @@ public class UserService {
     public String ChangePassword(String email, String password,String newPassword) {
         var anUser = this.findUserByEmail(email).get();
 
-        Logger logger = LoggerFactory.getLogger(UserService.class);
+
 
 
 
@@ -130,7 +134,7 @@ public class UserService {
 
             this.userJpaGateWay.changePassword(email, passwordEncoded);
 
-            logger.info(anUser.getPassword());
+
             return "Senha alterada com sucesso !";
         }
         throw new AuthException("Senha incorreta!");
@@ -176,5 +180,48 @@ public class UserService {
         }
         return "Senha alterada com sucesso !";
     }
+
+    public String validateRegister(String code){
+
+        ZoneId zoneId = ZoneId.systemDefault();
+
+        Instant instant = Instant.now();
+
+        ZonedDateTime zonedDateTime = instant.atZone(zoneId);
+
+        var userVerifier = this.userVerifierService.getUserVerifierByCode(code);
+
+        if(userVerifier.isEmpty()){
+            throw new UserException("Codigo invalido , nao existe nenhum login com este codigo!");
+        }
+        if(userVerifier.get().getExpires_at().compareTo(Instant.now()) <=0){
+            this.userVerifierService.delete(userVerifier.get());
+            throw new UserException("Seu codigo de validação expirou!");
+        }
+
+        userVerifier.get().setUserJpaEntityStatus(AccountStatus.ACTIVE);
+
+        var anUser = new User(
+                userVerifier.get().getUserEmail(),userVerifier.get().getUserPassword(),
+                UUID.randomUUID().toString(),AccountStatus.ACTIVE,Instant.from(zonedDateTime));
+
+        this.userVerifierService.delete(userVerifier.get());
+
+        var userEntity = UserJpaEntity.from(anUser);
+
+        try{
+            this.userJpaGateWay.save(userEntity);;
+        }catch (IllegalArgumentException e){
+            throw new UserException(e.getMessage());
+        }catch(OptimisticLockingFailureException e) {
+            throw new UserException((e.getMessage()));
+        }
+
+        return "Validação realizada com sucesso !";
+    }
+    public void delete(UserJpaEntity userJpaEntity){
+        this.userJpaGateWay.delete(userJpaEntity);
+    }
+
 
 }
