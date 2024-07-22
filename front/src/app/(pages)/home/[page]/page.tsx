@@ -80,7 +80,7 @@ export default function HomePage({
     return(
 <>           
     <HomeLayout/>
-    <div className="container p-5 mt-4 rounded-xl space-y-5 bg-gray-400 min-h-screen">
+    <div className="container p-2 mt-4 rounded-xl space-y-5 bg-gray-400 min-h-screen">
         <PostForm></PostForm>
         <GetPosts></GetPosts>
         

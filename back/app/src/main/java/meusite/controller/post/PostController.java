@@ -1,29 +1,23 @@
 package meusite.controller.post;
 
-
-import jakarta.servlet.http.HttpServletRequest;
-import meusite.controller.post.dto.EditPostDtoRequest;
-import meusite.controller.post.dto.FeedPostDtoResponse;
-import meusite.controller.post.dto.NewPostDtoRequest;
-import meusite.controller.post.dto.NewPostResponseDto;
-import meusite.domain.post.Post;
+import meusite.controller.post.dto.*;
+import meusite.repository.coments.jpa.ComentsJpaRepository;
+import meusite.repository.likes.jpa.LikesRepository;
 import meusite.repository.post.PostJpaGateWay;
-import meusite.repository.post.jpa.PostJpaEntity;
 import meusite.repository.post.jpa.PostJpaRepository;
-import meusite.repository.user.jpa.UserJpaRepository;
+import meusite.service.auth.AuthService;
 import meusite.service.post.PostService;
-import meusite.service.user.UserService;
-import org.apache.catalina.connector.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 @RequestMapping("/post")
 public class PostController {
+
+    @Autowired
+    AuthService aAuthService;
 
     @Autowired
     private PostJpaRepository postJpaRepository;
@@ -33,6 +27,13 @@ public class PostController {
 
     @Autowired
     private PostService postService = new PostService(aGateWay);
+
+    @Autowired
+    private ComentsJpaRepository comentsJpaRepository;
+
+    @Autowired
+    private LikesRepository likesRepository;
+
 
     @PostMapping
     public ResponseEntity<NewPostResponseDto> createPost(
@@ -94,4 +95,5 @@ public class PostController {
 
         return ResponseEntity.ok().body(posts);
     }
+
 }

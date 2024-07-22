@@ -35,6 +35,13 @@ public class PostJpaEntity{
     @Column(name="posted_at")
     private Instant timeStampTweet;
 
+    @Column(name = "likes")
+    private Integer likes;
+
+    @Column(name = "ncoments")
+    private Integer ncoments;
+
+
     public UserJpaEntity getUser(){
         return this.user;
     }
@@ -55,8 +62,17 @@ public class PostJpaEntity{
         this.content=  content;
         this.user = user;
         this.timeStampTweet = timeStampTweet;
+
     }
 
+    public PostJpaEntity(String content, UserJpaEntity user, long tweetId, Instant timeStampTweet, Integer likes, Integer nComents) {
+        this.content = content;
+        this.user = user;
+        this.tweetId = tweetId;
+        this.timeStampTweet = timeStampTweet;
+        this.likes = likes;
+        this.ncoments = nComents;
+    }
 
     public void setContent(String content){
         this.content = content;
@@ -74,7 +90,9 @@ public class PostJpaEntity{
                 post.getContent(),
                 post.getUser(),
                 post.getTweetId(),
-                post.getTimeStampTweet()
+                post.getTimeStampTweet(),
+                post.getLikes(),
+                post.getComents()
         );
     }
     public static FeedPostDtoResponse toModel(PostJpaEntity postJpaEntity){
@@ -94,8 +112,38 @@ public class PostJpaEntity{
         return new FeedPostDtoResponse(
                 postJpaEntity.getContent(),
                 postJpaEntity.getUser().getEmail(),
-                formattedDateTime);
+                formattedDateTime,postJpaEntity.getTweetId(), postJpaEntity.getLikes(), postJpaEntity.getComents());
     }
 
+    public void setUser(UserJpaEntity user) {
+        this.user = user;
+    }
 
+    public long getTweetId() {
+        return this.tweetId;
+    }
+
+    public void setTweetId(long tweetId) {
+        this.tweetId = tweetId;
+    }
+
+    public void setTimeStampTweet(Instant timeStampTweet) {
+        this.timeStampTweet = timeStampTweet;
+    }
+
+    public Integer getLikes() {
+        return likes;
+    }
+
+    public void setLikes(Integer likes) {
+        this.likes = likes;
+    }
+
+    public Integer getComents() {
+        return ncoments;
+    }
+
+    public void setComents(Integer coments) {
+        this.ncoments = coments;
+    }
 }

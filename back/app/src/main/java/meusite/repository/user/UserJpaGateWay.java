@@ -49,5 +49,11 @@ public class UserJpaGateWay {
         this.userJpaRepository.delete(userJpaEntity);
     }
 
+    public void updateFollowers(Integer followers, String id){
+        userJpaRepository.updateFollowers(followers, id);
+    }
+    public void updateFollowing(Integer following, String id){
+        userJpaRepository.updateFollowing(following, id);
+    }
 
 }

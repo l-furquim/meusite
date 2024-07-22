@@ -16,7 +16,7 @@ export async function DELETE(request: NextRequest){
             }
         });
 
-        console.log(response.data)
+        
 
         var backResponse;
 

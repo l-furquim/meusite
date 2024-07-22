@@ -60,4 +60,13 @@ public class PostJpaGateWay {
     public Page<PostJpaEntity> findAll(Pageable number){
         return this.findAll(number);
     }
+
+    public void updateLikes(Integer likes, Long tweetId){
+        this.postJpaRepository.updateLikes(likes,tweetId);
+    }
+    public void updateComents(Integer coments, Long tweetId){
+        this.postJpaRepository.updateComents(coments,tweetId);
+    }
+
+
 }

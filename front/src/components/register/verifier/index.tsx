@@ -35,7 +35,7 @@ export function CodeVerifierRegister() {
     try {
       const result = await frontEndApi.post("user/login/validate", JSONdata);
       
-      console.log(result.data);
+      
       
       const {response, errormessage} = result.data as ChangePasswordResponseType;
 

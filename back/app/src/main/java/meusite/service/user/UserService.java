@@ -205,6 +205,9 @@ public class UserService {
                 userVerifier.get().getUserEmail(),userVerifier.get().getUserPassword(),
                 UUID.randomUUID().toString(),AccountStatus.ACTIVE,Instant.from(zonedDateTime));
 
+        anUser.setFollowing(0);
+        anUser.setFollowes(0);
+
         this.userVerifierService.delete(userVerifier.get());
 
         var userEntity = UserJpaEntity.from(anUser);
@@ -221,6 +224,13 @@ public class UserService {
     }
     public void delete(UserJpaEntity userJpaEntity){
         this.userJpaGateWay.delete(userJpaEntity);
+    }
+
+    public void updateFollowers(Integer followers, String id){
+        userJpaGateWay.updateFollowers(followers, id);
+    }
+    public void updateFollowing(Integer following , String id){
+        userJpaGateWay.updateFollowing(following, id);
     }
 
 

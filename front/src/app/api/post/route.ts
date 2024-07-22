@@ -22,7 +22,10 @@ type FrontResponsePostType = {
 export type  PostContentType = {
     content: string,
     userEmail: string,
-    postedAt: string
+    postedAt: string,
+    tweet_id: number,
+    likes: number,
+    ncoments: number
 }
 
 export type PostsType = {

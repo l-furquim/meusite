@@ -37,4 +37,14 @@ public interface PostJpaRepository extends JpaRepository<PostJpaEntity,Long> {
 
     Page<PostJpaEntity> findAll(Pageable pageable);
 
+    @Modifying
+    @Transactional
+    @Query("UPDATE PostJpaEntity p SET p.likes = :likes WHERE p.tweetId = :tweetId")
+    void updateLikes(@Param("likes") Integer likes,@Param("tweetId") Long tweetId);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE PostJpaEntity p SET p.ncoments = :ncoments WHERE p.tweetId = :tweetId")
+    void updateComents(@Param("ncoments") Integer coments,@Param("tweetId") Long tweetId);
+
 }

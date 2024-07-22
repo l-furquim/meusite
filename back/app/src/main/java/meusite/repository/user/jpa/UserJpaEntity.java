@@ -37,6 +37,12 @@ public class UserJpaEntity implements UserDetails {
     @Column(name="status" ,nullable=false)
     private AccountStatus status;
 
+    @Column(name = "followers")
+    private Integer followers;
+
+    @Column(name = "following")
+    private Integer following;
+
     public UserJpaEntity(){
 
     }
@@ -56,14 +62,26 @@ public class UserJpaEntity implements UserDetails {
         this.status = status;
     }
 
+    public UserJpaEntity(String id, String email, String password, Instant createdAt, AccountStatus status, Integer followers, Integer following) {
+        this.id = id;
+        this.email = email;
+        this.password = password;
+        this.createdAt = createdAt;
+        this.status = status;
+        this.followers = followers;
+        this.following = following;
+    }
+
     public static UserJpaEntity from(final User user){
         return new UserJpaEntity(
                 user.getId(),
                 user.getEmail(),
                 user.getPassword(),
                 user.getCreatedAt(),
-                user.getStatus()
-                );
+                user.getStatus(),
+                user.getFollowes(),
+                user.getFollowing()
+        );
     }
 
     public static UserJpaEntity fromWithRole(final User user){
@@ -77,23 +95,18 @@ public class UserJpaEntity implements UserDetails {
     }
     public static GetUserModelDto toModel(UserJpaEntity userJpaEntity){
 
-        // Converter a string original para Instant
-
-
-        // Converter Instant para ZonedDateTime (opcional: ajustar o fuso horário)
         ZonedDateTime zonedDateTime = userJpaEntity.getCreatedAt().atZone(ZoneId.of("UTC"));
 
-        // Formatar ZonedDateTime para a string desejada
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
         String formattedDateTime = formatter.format(zonedDateTime);
-
 
 
         return new GetUserModelDto(
                 userJpaEntity.getEmail(),
                 userJpaEntity.getPassword(),
-                formattedDateTime
-
+                formattedDateTime,
+                userJpaEntity.getFollowers(),
+                userJpaEntity.getFollowing()
         );
     }
     public void setStatus(AccountStatus status){
@@ -165,5 +178,19 @@ public class UserJpaEntity implements UserDetails {
         this.createdAt = createdAt;
     }
 
+    public Integer getFollowers() {
+        return followers;
+    }
 
+    public void setFollowers(Integer followers) {
+        this.followers = followers;
+    }
+
+    public Integer getFollowing() {
+        return following;
+    }
+
+    public void setFollowing(Integer following) {
+        this.following = following;
+    }
 }

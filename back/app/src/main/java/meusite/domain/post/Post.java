@@ -17,6 +17,9 @@ public class Post {
     private UserJpaEntity user;
     private long tweetId;
     private Instant timeStampTweet;
+    private Integer likes;
+    private Integer coments;
+
 
     public String getContent() {
         return content;
@@ -27,6 +30,9 @@ public class Post {
         this.user = user;
         this.timeStampTweet = timeStampTweet;
     }
+
+
+
 
     public void setContent(String content) {
         this.content = content;
@@ -56,6 +62,19 @@ public class Post {
         this.timeStampTweet = timeStampTweet;
     }
 
+    public Integer getLikes() {
+        return likes;
+    }
 
+    public void setLikes(Integer likes) {
+        this.likes = likes;
+    }
 
+    public Integer getComents() {
+        return coments;
+    }
+
+    public void setComents(Integer coments) {
+        this.coments = coments;
+    }
 }

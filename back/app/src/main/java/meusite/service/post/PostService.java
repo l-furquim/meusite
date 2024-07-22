@@ -1,42 +1,29 @@
 package meusite.service.post;
-
-import meusite.controller.post.dto.EditPostDtoRequest;
-import meusite.controller.post.dto.FeedPostDtoResponse;
-import meusite.controller.post.dto.NewPostDtoRequest;
-import meusite.controller.post.dto.NewPostResponseDto;
+import meusite.controller.post.dto.*;
 import meusite.domain.post.Post;
 import meusite.repository.post.PostJpaGateWay;
 import meusite.repository.post.exception.PostException;
 import meusite.repository.post.jpa.PostJpaEntity;
-import meusite.repository.user.UserJpaGateWay;
-import meusite.repository.user.jpa.UserJpaRepository;
 import meusite.service.auth.AuthService;
-import meusite.service.exception.ServiceException;
-import meusite.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.text.ParseException;
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+
 @Service
 public class PostService {
 
     @Autowired
-    AuthService authService;
+    private AuthService authService;
 
     @Autowired
-    PostJpaGateWay postJpaGateWay;
+    private PostJpaGateWay postJpaGateWay;
 
-    @Autowired
-    UserJpaRepository userJpaRepository;
 
     public PostService(){
     }
@@ -44,6 +31,7 @@ public class PostService {
     public PostService(PostJpaGateWay postJpaGateWay){
         this.postJpaGateWay = postJpaGateWay;
     }
+
 
     public NewPostResponseDto createPost(NewPostDtoRequest postDtoRequest, String token){
 
@@ -64,9 +52,12 @@ public class PostService {
                 Instant.now()
 
         );
+        post.setLikes(0);
+        post.setComents(0);
+
         var postEntity = PostJpaEntity.from(post);
         postJpaGateWay.save(postEntity);
-        return new NewPostResponseDto(post.getContent(),post.getUser().getEmail());
+        return new NewPostResponseDto(post.getContent(),post.getUser().getEmail(), post.getLikes(), post.getComents());
     }
 
     public void save(PostJpaEntity postJpaEntity){
@@ -77,7 +68,12 @@ public class PostService {
         this.postJpaGateWay.editPostContent(tweetId,editPostDtoRequest);
     }
     public Optional<PostJpaEntity> findPostById(Long id){
-        return this.postJpaGateWay.findPostById(id);
+        var aId = postJpaGateWay.findPostById(id);
+
+        if(aId.isEmpty()){
+            throw new PostException("Não foi possivel encontrar  o post pelo id");
+        }
+        return aId;
     }
     public List<FeedPostDtoResponse> getAllPostsFormated(){
             var ob = this.postJpaGateWay.getAllPosts();
@@ -99,6 +95,22 @@ public class PostService {
 
         return list.stream().map(posts -> PostJpaEntity.toModel(posts)).collect(Collectors.toList());
     }
+
+    public void updateComents(Integer coments, Long tweetId){
+        this.postJpaGateWay.updateComents(coments,tweetId);
+    }
+
+    public void updateLikes(Integer likes, Long tweetId){
+        postJpaGateWay.updateLikes(likes, tweetId);
+    }
+
+
+
+
+
+
+
+
 
 
 }
