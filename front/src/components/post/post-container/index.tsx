@@ -14,6 +14,7 @@ import LikeContainer from "../like";
 import { useEffect, useState } from "react";
 import { LikeContentType, ListLikeContentType } from "@/app/api/post/like/route";
 import { frontEndApi } from "@/lib/api";
+import CommentContainer from "../comment/comment-container";
 
 
 
@@ -58,6 +59,7 @@ export type ListaPostsProps = {
   };
     
     return (
+      
       <div className="container mt-8 items-center rounded-md ">
         <ul>
           {posts.map((post) => (
@@ -65,56 +67,19 @@ export type ListaPostsProps = {
               <a href={`/profile/${post.userEmail}`}>
               <strong className="font-bold mt-2 mr-40">{post.userEmail}</strong>
               </a>
+              <a href={`/home/post/${post.tweet_id}`}>
               <p className=" text-slate-300">{post.content}</p>
+              </a>
               <p className="text-left items-row flex gap-8 ">    
               
               <LikeContainer post={post} initialIsLiked={isPostLikedByUser(post.tweet_id)}/>
-                 
-                
-              
-            <React.Fragment>
-            <p>
-            <MessageSquareDot onClick={handleClickOpen}
-              size={16} className="hover:cursor-pointer hover:stroke-white"
-              />
-              {post.ncoments}</p>
-        Open form dialog
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        >
-        <DialogTitle>Subscribe</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            To subscribe to this website, please enter your email address here. We
-            will send updates occasionally.
-          </DialogContentText>
-          <TextField
-            autoFocus
-            required
-            margin="dense"
-            id="name"
-            name="email"
-            label="Email Address"
-            type="email"
-            fullWidth
-            variant="standard"
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button type="submit">Subscribe</Button>
-        </DialogActions>
-      </Dialog>
-    </React.Fragment>
-
-              
+              <CommentContainer postId={post.tweet_id} ncomments={post.ncoments} />
             </p>
-            
             </li>
     
               ))} </ul>
       </div>
+      
   )
 }
   export default PostContainerr

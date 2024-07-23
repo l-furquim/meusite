@@ -70,7 +70,7 @@ async function onInsertPost({content}: InsertPostType){
 
 
   return(
-        <Dialog>
+        <Dialog >
       <DialogTrigger asChild>
         <Button variant="outline">Fazer um post</Button>
       </DialogTrigger>

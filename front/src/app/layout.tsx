@@ -5,7 +5,7 @@ import "./globals.css";
 import {cn } from '@/lib/utils'
 import { AuthContextProvider } from "@/context/auth-context";
 import { AppWindowIcon } from "lucide-react";
-import { LikesProvider } from "@/context/likes-context";
+
 
 
 
