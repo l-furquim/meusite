@@ -1,11 +1,14 @@
 package meusite.controller.post;
 
 import meusite.controller.post.dto.*;
+import meusite.repository.coments.ComentsJpaGateway;
 import meusite.repository.coments.jpa.ComentsJpaRepository;
 import meusite.repository.likes.jpa.LikesRepository;
 import meusite.repository.post.PostJpaGateWay;
+import meusite.repository.post.jpa.PostJpaEntity;
 import meusite.repository.post.jpa.PostJpaRepository;
 import meusite.service.auth.AuthService;
+import meusite.service.coments.implementation.ComentsServiceImplementation;
 import meusite.service.post.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -94,6 +97,18 @@ public class PostController {
         var posts = postService.getPostsInRange(pageNumber * 20, (pageNumber * 20) + 20);
 
         return ResponseEntity.ok().body(posts);
+    }
+
+    @GetMapping("/{postId}")
+    public ResponseEntity<GetPostResponseDto> getPost(@RequestHeader("Authorization")String header, @PathVariable("postId") Long postId){
+        var aPostGateway = PostJpaGateWay.build(postJpaRepository);
+        var postService = new PostService(aPostGateway);
+        var aCommentGateway = ComentsJpaGateway.build(comentsJpaRepository);
+        var aCommentService = ComentsServiceImplementation.build(aCommentGateway);
+        var user = aAuthService.extractUserFromToken(header.substring(7));
+        var post = postService.findPostById(postId);
+        var comments  = aCommentGateway.findCommentByPostId(post.get());
+        return ResponseEntity.ok().body(new GetPostResponseDto(PostJpaEntity.toModel(post.get()), aCommentService.listCommentsToModel(comments, user.get().getEmail())));
     }
 
 }

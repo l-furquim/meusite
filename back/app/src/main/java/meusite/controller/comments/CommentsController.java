@@ -51,6 +51,7 @@ public class CommentsController {
         return ResponseEntity.ok().body("Post comentado com sucesso !");
     }
 
+
     @PostMapping("/{commentId}/like")
     public ResponseEntity<Void> likeComent(@PathVariable("commentId") Long comentId,@RequestHeader("Authorization") String header){
         var aPostGateway = PostJpaGateWay.build(postJpaRepository);

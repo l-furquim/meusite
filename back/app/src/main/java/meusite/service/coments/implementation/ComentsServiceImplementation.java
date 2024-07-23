@@ -1,6 +1,7 @@
 package meusite.service.coments.implementation;
 
 import meusite.controller.comments.dto.ComentPostRequestDto;
+import meusite.controller.comments.dto.GetCommentsFormattedDto;
 import meusite.domain.coments.Coments;
 import meusite.domain.gateway.ComentsGateway;
 
@@ -12,7 +13,9 @@ import meusite.repository.user.jpa.UserJpaEntity;
 import meusite.service.coments.ComentsService;
 import org.springframework.dao.OptimisticLockingFailureException;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class ComentsServiceImplementation implements ComentsService {
 
@@ -52,5 +55,10 @@ public class ComentsServiceImplementation implements ComentsService {
         }
 
 
+    }
+
+    @Override
+    public List<GetCommentsFormattedDto> listCommentsToModel(List<ComentsJpaEntity> comentsJpaEntityList, String userEmail) {
+            return comentsJpaEntityList.stream().map(comment -> ComentsJpaEntity.toModel(comment, userEmail)).collect(Collectors.toList());
     }
 }

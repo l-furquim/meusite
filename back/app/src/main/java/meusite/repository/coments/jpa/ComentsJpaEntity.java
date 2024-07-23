@@ -1,9 +1,12 @@
 package meusite.repository.coments.jpa;
 
 import jakarta.persistence.*;
+import meusite.controller.comments.dto.GetCommentsFormattedDto;
 import meusite.domain.coments.Coments;
 import meusite.repository.post.jpa.PostJpaEntity;
 import meusite.repository.user.jpa.UserJpaEntity;
+
+import java.util.List;
 
 @Entity
 @Table(name = "coments")
@@ -86,6 +89,15 @@ public class ComentsJpaEntity {
                 coments.getUserId(),
                 coments.getPostId(),
                 coments.getLikes()
+        );
+    }
+    public static GetCommentsFormattedDto toModel(ComentsJpaEntity comentsJpaEntity, String userEmail){
+        return new GetCommentsFormattedDto(
+                comentsJpaEntity.getId(),
+                comentsJpaEntity.getContent(),
+                userEmail,
+                comentsJpaEntity.getPostID(),
+                comentsJpaEntity.getLikes()
         );
     }
 

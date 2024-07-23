@@ -3,7 +3,9 @@ package meusite.repository.coments;
 import meusite.domain.gateway.ComentsGateway;
 import meusite.repository.coments.jpa.ComentsJpaEntity;
 import meusite.repository.coments.jpa.ComentsJpaRepository;
+import meusite.repository.post.jpa.PostJpaEntity;
 
+import java.util.List;
 import java.util.Optional;
 
 
@@ -34,5 +36,12 @@ public class ComentsJpaGateway implements ComentsGateway {
     @Override
     public Optional<ComentsJpaEntity> findById(Long id) {
         return comentsJpaRepository.findById(id);
+    }
+
+    @Override
+    public List<ComentsJpaEntity> findCommentByPostId(PostJpaEntity postJpaEntity) {
+
+
+        return comentsJpaRepository.findCommentByTweetId(postJpaEntity);
     }
 }
