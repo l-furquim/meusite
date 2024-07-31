@@ -2,6 +2,7 @@ package meusite.service.likes.implementation;
 
 import meusite.domain.gateway.LikeGateway;
 import meusite.domain.likes.Likes;
+import meusite.repository.coments.exception.ComentsException;
 import meusite.repository.coments.jpa.ComentsJpaEntity;
 import meusite.repository.likes.jpa.LikesJpaEntity;
 import meusite.repository.post.exception.PostException;
@@ -89,4 +90,14 @@ public class LikesServiceImplementation implements LikesService {
                 throw new UserException((e.getMessage()));
             }
         }
+
+    @Override
+    public void unlikeComment(UserJpaEntity user, ComentsJpaEntity comment) {
+        var like = likeGateway.findLikeByUserAndCommentId(user,comment);
+
+        if(like.isPresent()){
+            likeGateway.delete(like.get());
+        }
+        throw new ComentsException("nao foi possivel dar deslike em um comentario que nao possui o like indentificado !");
+    }
 }

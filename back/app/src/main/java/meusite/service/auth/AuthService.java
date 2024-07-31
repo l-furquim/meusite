@@ -1,41 +1,28 @@
 package meusite.service.auth;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwts;
 import com.auth0.jwt.algorithms.Algorithm;
 import meusite.controller.user.dto.LoginRequestDto;
 import meusite.controller.user.dto.LoginResponseDto;
-import meusite.controller.user.dto.RegisterRequestDto;
 import meusite.repository.user.UserJpaGateWay;
 import meusite.repository.user.jpa.UserJpaEntity;
 import meusite.repository.user.jpa.UserJpaRepository;
 import meusite.service.auth.exception.AuthException;
-import meusite.service.user.UserService;
+import meusite.service.user.implementation.UserServiceImplementation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.exceptions.JWTCreationException;
-
-import javax.security.auth.login.LoginException;
 import java.time.Instant;
 import java.util.Optional;
 
 @Service
 public class AuthService implements UserDetailsService {
 
-    @Autowired
-    UserJpaRepository userJpaRepository;
 
     @Autowired
-    UserJpaGateWay userJpaGateWay = UserJpaGateWay.build(userJpaRepository);
-
-    @Autowired
-    UserService userService = new UserService(userJpaGateWay);
+    private UserJpaRepository userJpaRepository;
 
     private final String TOKEN_SECRET = "gorila";
     private final String TOKEN_ISSUER = "meusite";
@@ -80,6 +67,11 @@ public class AuthService implements UserDetailsService {
     }
     @Override
     public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException{
+
+        var aGateway = UserJpaGateWay.build(userJpaRepository);
+
+        var userService = UserServiceImplementation.build(aGateway);
+
         var auser = userService.findUserByEmail(username);
 
         if(auser.isPresent()){
@@ -92,7 +84,7 @@ public class AuthService implements UserDetailsService {
     public LoginResponseDto login(LoginRequestDto loginRequest) {
         var aGateWay = UserJpaGateWay.build(userJpaRepository);
 
-        var aService = new UserService(aGateWay);
+        var aService = UserServiceImplementation.build(aGateWay);
 
         if (!aService.loginCredentialsValidate(loginRequest.email(), loginRequest.password())) {
             throw new AuthException("Login invalido, senha ou email incorretos !");
@@ -110,11 +102,11 @@ public class AuthService implements UserDetailsService {
     public Optional<UserJpaEntity> extractUserFromToken(String jwtToken) {
         var useremail = this.validateToken(jwtToken);
 
-        var aGateWay = UserJpaGateWay.build(userJpaRepository);
+        var aGateway = UserJpaGateWay.build(userJpaRepository);
 
-        var aService = new UserService(aGateWay);
+        var userServiceImplementation = UserServiceImplementation.build(aGateway);
 
-        var user = aService.findUserByEmail(useremail);
+        var user = userServiceImplementation.findUserByEmail(useremail);
         return user;
     }
 
@@ -124,6 +116,9 @@ public class AuthService implements UserDetailsService {
 
     public String deleteUser(String token){
         try{
+            var aGateway = UserJpaGateWay.build(userJpaRepository);
+
+            var userServiceImplementation = UserServiceImplementation.build(aGateway);
             final var anAlgorithm = Algorithm.HMAC256(TOKEN_SECRET);
 
             final var aVerifier = JWT.require(anAlgorithm)
@@ -138,10 +133,10 @@ public class AuthService implements UserDetailsService {
                 throw new AuthException("este codigo não esta connectado a nenhum email !");
             }
 
-            var user = this.userService.findUserByEmail(userEmail);
+            var user = userServiceImplementation.findUserByEmail(userEmail);
 
             if(user.isPresent()){
-                this.userService.delete(user.get());
+                userServiceImplementation.delete(user.get());
                 return "Usuario excluido com sucesso";
             }else {
                 throw new AuthException("Token invalido para deleção!");

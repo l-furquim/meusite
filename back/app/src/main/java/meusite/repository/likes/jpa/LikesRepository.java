@@ -1,5 +1,6 @@
 package meusite.repository.likes.jpa;
 
+import meusite.repository.coments.jpa.ComentsJpaEntity;
 import meusite.repository.post.jpa.PostJpaEntity;
 import meusite.repository.user.jpa.UserJpaEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,4 +22,7 @@ public interface LikesRepository extends JpaRepository<LikesJpaEntity, Long> {
 
     @Query("Select l FROM LikesJpaEntity l WHERE l.id = :id")
     Optional<List<LikesJpaEntity>> findLikesByUserId(@Param("id") UserJpaEntity id);
+
+    @Query("Select l FROM LikesJpaEntity l WHERE l.id = :id AND l.coment_id = :commentId")
+    Optional<LikesJpaEntity> findLikeByUserAndCommentId(@Param("id") UserJpaEntity id, @Param("commentId") ComentsJpaEntity commentId);
 }

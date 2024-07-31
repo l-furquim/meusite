@@ -11,6 +11,6 @@ public interface LikesService {
 
     void likeComment(UserJpaEntity user,ComentsJpaEntity coments);
 
-
+    void unlikeComment(UserJpaEntity user, ComentsJpaEntity comment);
 
 }

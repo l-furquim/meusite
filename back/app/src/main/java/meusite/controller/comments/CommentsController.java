@@ -11,6 +11,9 @@ import meusite.service.auth.AuthService;
 import meusite.service.coments.implementation.ComentsServiceImplementation;
 import meusite.service.likes.implementation.LikesServiceImplementation;
 import meusite.service.post.PostService;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -61,6 +64,10 @@ public class CommentsController {
         var aLikeGateway = LikesJpaGateway.build(likesRepository);
         var aLikeService = LikesServiceImplementation.build(aLikeGateway);
 
+        Logger logger = LoggerFactory.getLogger(CommentsController.class);
+
+        logger.info(comentId.toString());
+
         var cookie = header.substring(7);
         var user = aAuthService.extractUserFromToken(cookie);
         var comment = aCommentGateway.findById(comentId);
@@ -69,6 +76,27 @@ public class CommentsController {
 
         aLikeService.likeComment(user.get(),comment.get());
         aCommentGateway.updateLikes(comment.get().getLikes() + 1, comment.get().getId());
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{commentId}/unlike")
+    public ResponseEntity<Void> unlikeComment(@PathVariable("commentId") Long commentId, @RequestHeader("Authorization") String header){
+        var aPostGateway = PostJpaGateWay.build(postJpaRepository);
+        var postService = new PostService(aPostGateway);
+
+        var aCommentGateway = ComentsJpaGateway.build(comentsJpaRepository);
+        var aLikeGateway = LikesJpaGateway.build(likesRepository);
+        var aLikeService = LikesServiceImplementation.build(aLikeGateway);
+
+        var cookie = header.substring(7);
+        var user = aAuthService.extractUserFromToken(cookie);
+        var comment = aCommentGateway.findById(commentId);
+        var post = postService.findPostById(comment.get().getPostID());
+
+        aLikeService.unlikeComment(user.get(), comment.get());
+
+        postService.updateComents(post.get().getComents() -1, post.get().getTweetId());
+
         return ResponseEntity.ok().build();
     }
 }

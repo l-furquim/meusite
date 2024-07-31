@@ -2,6 +2,7 @@ package meusite.repository.likes;
 
 import meusite.controller.likes.dto.GetUserLikesResponseDto;
 import meusite.domain.gateway.LikeGateway;
+import meusite.repository.coments.jpa.ComentsJpaEntity;
 import meusite.repository.likes.jpa.LikesJpaEntity;
 import meusite.repository.likes.jpa.LikesRepository;
 
@@ -53,6 +54,11 @@ public class LikesJpaGateway implements LikeGateway {
     @Override
     public Optional<List<LikesJpaEntity>> findLikesByUserId(UserJpaEntity id) {
         return likesRepository.findLikesByUserId(id);
+    }
+
+    @Override
+    public Optional<LikesJpaEntity> findLikeByUserAndCommentId(UserJpaEntity user, ComentsJpaEntity comment) {
+        return this.likesRepository.findLikeByUserAndCommentId(user, comment);
     }
 
 

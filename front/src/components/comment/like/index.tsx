@@ -2,28 +2,37 @@ import { useState } from "react";
 import { frontEndApi } from "@/lib/api";
 import { Heart, HeartOff } from "lucide-react";
 import { PostContentType } from "@/app/api/post/route";
+import { CommentContentType } from "@/app/api/post/splited/route";
 
 interface LikeContainerProps {
-  post: PostContentType;
+  comment: CommentContentType;  
   initialIsLiked: boolean;
 }
 
-const LikeContainerPost: React.FC<LikeContainerProps> = ({ post, initialIsLiked }) => {
+const LikeContainerComment: React.FC<LikeContainerProps> = ({ comment, initialIsLiked }) => {
   const [isLiked, setIsLiked] = useState(initialIsLiked);
-  const [nLikes, setNLikes] = useState(post.likes);
+  const [nLikes, setNLikes] = useState(comment.likes);
+  const [error, setError] = useState(null);
+
 
   const handleLike = async () => {
     try {
       if (isLiked) {
-        await frontEndApi.post("/post/unlike", post.tweet_id)
+        await frontEndApi.post("/comment/unlike", JSON.stringify(comment.comentId))
+       
         setNLikes((prevLikes: number) => prevLikes - 1);
+      
       } else {
-        await frontEndApi.post("/post/like", post.tweet_id);
+        
+        console.log(comment.comentId);
+        await frontEndApi.post("/comment/like", JSON.stringify(comment.comentId));
         setNLikes((prevLikes: number) => prevLikes + 1);
+        
+      
       }
       setIsLiked(!isLiked);
     } catch (error) {
-      console.error("Erro ao curtir/descurtir post:", error);
+      console.error("Erro ao curtir/descurtir comentario:", error);
     }
   };
 
@@ -43,8 +52,9 @@ const LikeContainerPost: React.FC<LikeContainerProps> = ({ post, initialIsLiked 
         />
       )}
       <span>{nLikes}</span>
+      <span>{}</span>
       </div>
   );
 };
 
-export default LikeContainerPost;
+export default LikeContainerComment;

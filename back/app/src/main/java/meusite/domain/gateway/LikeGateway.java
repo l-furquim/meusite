@@ -1,6 +1,7 @@
 package meusite.domain.gateway;
 
 import meusite.controller.likes.dto.GetUserLikesResponseDto;
+import meusite.repository.coments.jpa.ComentsJpaEntity;
 import meusite.repository.likes.jpa.LikesJpaEntity;
 import meusite.repository.post.jpa.PostJpaEntity;
 import meusite.repository.user.jpa.UserJpaEntity;
@@ -19,4 +20,6 @@ public interface LikeGateway {
     Optional<LikesJpaEntity> findLikeByUserIdAndPostId(UserJpaEntity userJpaEntity, PostJpaEntity postJpa);
 
     Optional<List<LikesJpaEntity>> findLikesByUserId(UserJpaEntity id);
+
+    Optional<LikesJpaEntity> findLikeByUserAndCommentId(UserJpaEntity user, ComentsJpaEntity comment);
 }

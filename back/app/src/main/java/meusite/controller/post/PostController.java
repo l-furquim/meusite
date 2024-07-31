@@ -101,8 +101,6 @@ public class PostController {
 
     @GetMapping("/{postId}")
     public ResponseEntity<GetPostResponseDto> getPost(@RequestHeader("Authorization")String header, @PathVariable("postId") Long postId){
-        var aPostGateway = PostJpaGateWay.build(postJpaRepository);
-        var postService = new PostService(aPostGateway);
         var aCommentGateway = ComentsJpaGateway.build(comentsJpaRepository);
         var aCommentService = ComentsServiceImplementation.build(aCommentGateway);
         var user = aAuthService.extractUserFromToken(header.substring(7));

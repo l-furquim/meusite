@@ -1,20 +1,14 @@
 'use client'
 
 import { PostContentType } from "@/app/api/post/route";
-import { MessageSquareDot } from "lucide-react";
 import * as React from 'react';
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
 import LikeContainer from "../like";
 import { useEffect, useState } from "react";
 import { LikeContentType, ListLikeContentType } from "@/app/api/post/like/route";
 import { frontEndApi } from "@/lib/api";
 import CommentContainer from "../comment/comment-container";
+import { useNavigate } from "react-router-dom";
+import LikeContainerPost from "../like";
 
 
 
@@ -26,10 +20,13 @@ export type ListaPostsProps = {
   //className="container items-center space-y-10 rounded-md"
 
   const PostContainerr: React.FC<ListaPostsProps> = ({ posts }) => {
-    
+  
     const [open, setOpen] = React.useState(false);
     const [userLikes, setUserLikes] = useState<LikeContentType[]>([]);
-    
+
+
+  
+
     const handleClickOpen = () => {
     setOpen(true);
   };
@@ -72,7 +69,7 @@ export type ListaPostsProps = {
               </a>
               <p className="text-left items-row flex gap-8 ">    
               
-              <LikeContainer post={post} initialIsLiked={isPostLikedByUser(post.tweet_id)}/>
+              <LikeContainerPost post={post} initialIsLiked={isPostLikedByUser(post.tweet_id)}/>
               <CommentContainer postId={post.tweet_id} ncomments={post.ncoments} />
             </p>
             </li>

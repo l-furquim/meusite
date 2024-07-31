@@ -4,7 +4,7 @@ import meusite.repository.user.UserJpaGateWay;
 import meusite.repository.user.exception.UserException;
 import meusite.repository.user.jpa.UserJpaRepository;
 import meusite.service.auth.AuthService;
-import meusite.service.user.UserService;
+import meusite.service.user.implementation.UserServiceImplementation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,15 +21,12 @@ public class UserController {
     @Autowired
     AuthService aAuthService;
 
-    @Autowired
-    UserJpaGateWay aGateGay = UserJpaGateWay.build(userJpaRepository);
-
-    @Autowired
-    UserService aService = new UserService(aGateGay);
-
 
     @PostMapping("/register")
     public ResponseEntity<RegisterResponseDto> userRegister(@RequestBody RegisterRequestDto registerRequestDto) {
+        var aGateway = UserJpaGateWay.build(userJpaRepository);
+
+        var aService = UserServiceImplementation.build(aGateway);
 
         aService.createUser(registerRequestDto);
 
@@ -47,6 +44,10 @@ public class UserController {
     @PostMapping("/{id}/edit")
     public ResponseEntity<Void> editUser(
             @PathVariable String id, @RequestBody RequestEditUserDto requestEditUserDto) {
+
+        var aGateway = UserJpaGateWay.build(userJpaRepository);
+
+        var aService = UserServiceImplementation.build(aGateway);
 
         var aUser = aService.findById(id);
 
@@ -90,6 +91,10 @@ public class UserController {
     @GetMapping("/getData/{cookie}")
     public ResponseEntity<GetUserDataResponseDto> getUserData(@PathVariable String cookie) {
 
+        var aGateway = UserJpaGateWay.build(userJpaRepository);
+
+        var aService = UserServiceImplementation.build(aGateway);
+
         var subject = aAuthService.extractSubject(cookie);
 
         var User = aService.findUserByEmail(subject).get();
@@ -104,6 +109,10 @@ public class UserController {
     public ResponseEntity<ChangePasswordResponseDto> changeUserLoggedPassword(
             @RequestBody ChangePasswordRequestDto requestDto, @RequestHeader("Authorization") String header) {
 
+        var aGateway = UserJpaGateWay.build(userJpaRepository);
+
+        var aService = UserServiceImplementation.build(aGateway);
+
         var token = header.substring(7);
 
         var userEmail = this.aAuthService.extractSubject(token);
@@ -116,6 +125,10 @@ public class UserController {
     public ResponseEntity<ChangePasswordResponseDto> changeUserNotLoggedPassword(
             @RequestBody ChangePasswordNotLoggedRequestDto requestDto) {
 
+        var aGateway = UserJpaGateWay.build(userJpaRepository);
+
+        var aService = UserServiceImplementation.build(aGateway);
+
         return ResponseEntity.ok().body(new ChangePasswordResponseDto(
                 aService.ChangePasswordNotLoggedEmail(requestDto.email())));
     }
@@ -123,18 +136,26 @@ public class UserController {
 
     @PostMapping("/password/verifiercode")
     public ResponseEntity<ChangePasswordNotLoggedrReponseDto> verfierCode(@RequestBody VerifierCodeRequestDto requestDto) {
+        var aGateway = UserJpaGateWay.build(userJpaRepository);
+
+        var aService = UserServiceImplementation.build(aGateway);
+
         var user = aService.verifierCode(requestDto.code());
 
 
         return ResponseEntity.ok().body(
-                new ChangePasswordNotLoggedrReponseDto(this.aService.ChangePasswordNotLogged(user, requestDto.newpassword())));
+                new ChangePasswordNotLoggedrReponseDto(aService.ChangePasswordNotLogged(user, requestDto.newpassword())));
     }
 
     @PostMapping("/register/validate")
     public ResponseEntity<ChangePasswordNotLoggedrReponseDto> verifierLogin(@RequestBody VerifierLoginRequestDto verifierLoginRequestDto) {
 
+        var aGateway = UserJpaGateWay.build(userJpaRepository);
+
+        var aService = UserServiceImplementation.build(aGateway);
+
         return ResponseEntity.ok().body(
-                new ChangePasswordNotLoggedrReponseDto(this.aService.validateRegister(verifierLoginRequestDto.code())));
+                new ChangePasswordNotLoggedrReponseDto(aService.validateRegister(verifierLoginRequestDto.code())));
     }
 
     @DeleteMapping("/delete")
@@ -147,6 +168,12 @@ public class UserController {
 
     @PutMapping("/follow/{userId}")
     public ResponseEntity<FollowUserResponseDto> followUser(@PathVariable("userId") String userId, @RequestHeader("Authorization") String header){
+        var aGateway = UserJpaGateWay.build(userJpaRepository);
+
+        var aService = UserServiceImplementation.build(aGateway);
+
+
+
         var userToFollow = aService.findById(userId);
         var user = aAuthService.extractUserFromToken(header.substring(7));
 
@@ -161,6 +188,11 @@ public class UserController {
     }
     @PutMapping("/unfollow/{userId}")
     public ResponseEntity<FollowUserResponseDto> unfollowUser(@PathVariable("userId") String userId, @RequestHeader("Authorization") String header){
+        var aGateway = UserJpaGateWay.build(userJpaRepository);
+
+        var aService = UserServiceImplementation.build(aGateway);
+
+
         var userToUnFollow = aService.findById(userId);
         var user = aAuthService.extractUserFromToken(header.substring(7));
 
