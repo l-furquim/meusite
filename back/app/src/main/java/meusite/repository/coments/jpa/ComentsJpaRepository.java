@@ -1,6 +1,7 @@
 package meusite.repository.coments.jpa;
 
 import meusite.repository.post.jpa.PostJpaEntity;
+import meusite.repository.user.jpa.UserJpaEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ComentsJpaRepository extends JpaRepository<ComentsJpaEntity, Long> {
@@ -20,4 +22,7 @@ public interface ComentsJpaRepository extends JpaRepository<ComentsJpaEntity, Lo
 
     @Query("SELECT c FROM ComentsJpaEntity c WHERE c.tweet_id = :tweet_id")
     List<ComentsJpaEntity> findCommentByTweetId(@Param("tweet_id")PostJpaEntity tweetId);
+
+    @Query("SELECT c FROM ComentsJpaEntity c WHERE c.id = :id")
+    Optional<List<ComentsJpaEntity>> findCommentByUserId(@Param("id")UserJpaEntity userJpaEntity);
 }

@@ -4,6 +4,7 @@ import meusite.domain.post.Post;
 import meusite.repository.post.PostJpaGateWay;
 import meusite.repository.post.exception.PostException;
 import meusite.repository.post.jpa.PostJpaEntity;
+import meusite.repository.user.jpa.UserJpaEntity;
 import meusite.service.auth.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -103,6 +104,10 @@ public class PostService {
     public void updateLikes(Integer likes, Long tweetId){
         postJpaGateWay.updateLikes(likes, tweetId);
     }
+    public Optional<List<PostJpaEntity>> findAllByUserId(UserJpaEntity userJpaEntity){
+        return postJpaGateWay.findAllByUserId(userJpaEntity);
+    }
+
 
 
 

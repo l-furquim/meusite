@@ -47,4 +47,6 @@ public interface PostJpaRepository extends JpaRepository<PostJpaEntity,Long> {
     @Query("UPDATE PostJpaEntity p SET p.ncoments = :ncoments WHERE p.tweetId = :tweetId")
     void updateComents(@Param("ncoments") Integer coments,@Param("tweetId") Long tweetId);
 
+    @Query("SELECT p FROM PostJpaEntity p WHERE p.id = :id")
+    Optional<List<PostJpaEntity>> findAllByUserId(@Param("id") UserJpaEntity userJpaEntity);
 }

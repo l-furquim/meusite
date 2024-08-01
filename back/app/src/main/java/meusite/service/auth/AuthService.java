@@ -2,10 +2,19 @@ package meusite.service.auth;
 import com.auth0.jwt.algorithms.Algorithm;
 import meusite.controller.user.dto.LoginRequestDto;
 import meusite.controller.user.dto.LoginResponseDto;
+import meusite.repository.coments.ComentsJpaGateway;
+import meusite.repository.coments.jpa.ComentsJpaRepository;
+import meusite.repository.likes.LikesJpaGateway;
+import meusite.repository.likes.jpa.LikesRepository;
+import meusite.repository.post.PostJpaGateWay;
+import meusite.repository.post.jpa.PostJpaRepository;
 import meusite.repository.user.UserJpaGateWay;
 import meusite.repository.user.jpa.UserJpaEntity;
 import meusite.repository.user.jpa.UserJpaRepository;
 import meusite.service.auth.exception.AuthException;
+import meusite.service.coments.implementation.ComentsServiceImplementation;
+import meusite.service.likes.implementation.LikesServiceImplementation;
+import meusite.service.post.PostService;
 import meusite.service.user.implementation.UserServiceImplementation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,6 +25,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class AuthService implements UserDetailsService {
@@ -23,6 +33,16 @@ public class AuthService implements UserDetailsService {
 
     @Autowired
     private UserJpaRepository userJpaRepository;
+
+    @Autowired
+    private PostJpaRepository postJpaRepository;
+
+    @Autowired
+    private ComentsJpaRepository comentsJpaRepository;
+
+    @Autowired
+    private LikesRepository likesRepository;
+
 
     private final String TOKEN_SECRET = "gorila";
     private final String TOKEN_ISSUER = "meusite";
@@ -119,6 +139,15 @@ public class AuthService implements UserDetailsService {
             var aGateway = UserJpaGateWay.build(userJpaRepository);
 
             var userServiceImplementation = UserServiceImplementation.build(aGateway);
+
+            var postGateway = PostJpaGateWay.build( postJpaRepository);
+
+            var commentGateway = ComentsJpaGateway.build(comentsJpaRepository);
+
+            var likeGateway = LikesJpaGateway.build(likesRepository);
+
+            var postService = new PostService(postGateway);
+
             final var anAlgorithm = Algorithm.HMAC256(TOKEN_SECRET);
 
             final var aVerifier = JWT.require(anAlgorithm)
@@ -135,7 +164,23 @@ public class AuthService implements UserDetailsService {
 
             var user = userServiceImplementation.findUserByEmail(userEmail);
 
+            var posts= postService.findAllByUserId(user.get());
+
+            var comments = commentGateway.findAllByUserId(user.get());
+
+            var likes = likeGateway.findLikesByUserId(user.get());
+
             if(user.isPresent()){
+                for(int i= 0; i==posts.get().size(); i++){
+                    postGateway.delete(posts.get().get(i));
+
+                }
+                for(int i= 0; i==comments.get().size(); i++){
+                    commentGateway.delete(comments.get().get(i));
+                }
+                for(int i= 0; i==likes.get().size(); i++){
+                    likeGateway.delete(likes.get().get(i));
+                }
                 userServiceImplementation.delete(user.get());
                 return "Usuario excluido com sucesso";
             }else {

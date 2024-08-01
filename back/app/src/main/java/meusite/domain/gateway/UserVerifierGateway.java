@@ -1,16 +1,17 @@
-package meusite.service.verifier;
+package meusite.domain.gateway;
 
 import meusite.repository.verifier.jpa.UserVerifierJpaEntity;
 
 import java.util.Optional;
 
-public interface UserVerifierService {
-
-    void delete(UserVerifierJpaEntity userVerifierJpaEntity);
+public interface UserVerifierGateway {
 
     Optional<UserVerifierJpaEntity> getUserVerifierByCode(String code);
 
     Optional<UserVerifierJpaEntity> getUserVerifierByUserEmail(String email);
 
-    void save(UserVerifierJpaEntity userVerifierJpa);
+    void delete(UserVerifierJpaEntity userVerifierJpaEntity);
+
+    void save(UserVerifierJpaEntity userVerifierJpaEntity);
+
 }

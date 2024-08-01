@@ -4,6 +4,7 @@ import meusite.repository.coments.ComentsJpaGateway;
 import meusite.repository.coments.jpa.ComentsJpaEntity;
 import meusite.repository.coments.jpa.ComentsJpaRepository;
 import meusite.repository.post.jpa.PostJpaEntity;
+import meusite.repository.user.jpa.UserJpaEntity;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,4 +20,7 @@ public interface ComentsGateway {
 
     List<ComentsJpaEntity> findCommentByPostId(PostJpaEntity id);
 
+    Optional<List<ComentsJpaEntity>> findAllByUserId(UserJpaEntity userJpaEntity);
+
+    void delete(ComentsJpaEntity comentsJpaEntity);
 }

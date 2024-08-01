@@ -67,6 +67,15 @@ public class PostJpaGateWay {
     public void updateComents(Integer coments, Long tweetId){
         this.postJpaRepository.updateComents(coments,tweetId);
     }
+    public void delete(PostJpaEntity postJpaEntity){
+        this.postJpaRepository.delete(postJpaEntity);
+    }
+
+    public Optional<List<PostJpaEntity>> findAllByUserId(UserJpaEntity userJpaEntity){
+        return postJpaRepository.findAllByUserId(userJpaEntity);
+    }
+
+
 
 
 }

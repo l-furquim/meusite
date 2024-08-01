@@ -3,8 +3,12 @@ import meusite.controller.user.dto.*;
 import meusite.repository.user.UserJpaGateWay;
 import meusite.repository.user.exception.UserException;
 import meusite.repository.user.jpa.UserJpaRepository;
+import meusite.repository.verifier.UserVerifierJpaGateway;
+import meusite.repository.verifier.jpa.UserVerifierRepository;
 import meusite.service.auth.AuthService;
+import meusite.service.auth.EmailService;
 import meusite.service.user.implementation.UserServiceImplementation;
+import meusite.service.verifier.implementation.UserVerifierServiceImplementation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,14 +25,25 @@ public class UserController {
     @Autowired
     AuthService aAuthService;
 
+    @Autowired
+    UserVerifierRepository userVerifierRepository;
+
+    @Autowired
+    EmailService emailService;
+
 
     @PostMapping("/register")
     public ResponseEntity<RegisterResponseDto> userRegister(@RequestBody RegisterRequestDto registerRequestDto) {
         var aGateway = UserJpaGateWay.build(userJpaRepository);
 
+        var userVerifierGateway = UserVerifierJpaGateway.build(userVerifierRepository);
+
+        var userVerifierService = UserVerifierServiceImplementation.build(userVerifierGateway);
+
+
         var aService = UserServiceImplementation.build(aGateway);
 
-        aService.createUser(registerRequestDto);
+        aService.createUser(registerRequestDto, userVerifierService, emailService);
 
         return ResponseEntity.ok().body(new RegisterResponseDto("Usuario registrado com sucesso, "));
     }
@@ -129,8 +144,12 @@ public class UserController {
 
         var aService = UserServiceImplementation.build(aGateway);
 
+        var userVerifierGateway = UserVerifierJpaGateway.build(userVerifierRepository);
+
+        var userService = UserVerifierServiceImplementation.build(userVerifierGateway);
+
         return ResponseEntity.ok().body(new ChangePasswordResponseDto(
-                aService.ChangePasswordNotLoggedEmail(requestDto.email())));
+                aService.ChangePasswordNotLoggedEmail(requestDto.email(), emailService, userService)));
     }
 
 
@@ -140,7 +159,11 @@ public class UserController {
 
         var aService = UserServiceImplementation.build(aGateway);
 
-        var user = aService.verifierCode(requestDto.code());
+        var userVerifierGateway = UserVerifierJpaGateway.build(userVerifierRepository);
+
+        var userService = UserVerifierServiceImplementation.build(userVerifierGateway);
+
+        var user = aService.verifierCode(requestDto.code(), userService);
 
 
         return ResponseEntity.ok().body(
@@ -150,12 +173,16 @@ public class UserController {
     @PostMapping("/register/validate")
     public ResponseEntity<ChangePasswordNotLoggedrReponseDto> verifierLogin(@RequestBody VerifierLoginRequestDto verifierLoginRequestDto) {
 
+        var userVerifierGateway = UserVerifierJpaGateway.build(userVerifierRepository);
+
+        var userVerifierService = UserVerifierServiceImplementation.build(userVerifierGateway);
+
         var aGateway = UserJpaGateWay.build(userJpaRepository);
 
         var aService = UserServiceImplementation.build(aGateway);
 
         return ResponseEntity.ok().body(
-                new ChangePasswordNotLoggedrReponseDto(aService.validateRegister(verifierLoginRequestDto.code())));
+                new ChangePasswordNotLoggedrReponseDto(aService.validateRegister(verifierLoginRequestDto.code(), userVerifierService)));
     }
 
     @DeleteMapping("/delete")

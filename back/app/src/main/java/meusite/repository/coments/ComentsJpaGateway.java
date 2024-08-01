@@ -4,6 +4,7 @@ import meusite.domain.gateway.ComentsGateway;
 import meusite.repository.coments.jpa.ComentsJpaEntity;
 import meusite.repository.coments.jpa.ComentsJpaRepository;
 import meusite.repository.post.jpa.PostJpaEntity;
+import meusite.repository.user.jpa.UserJpaEntity;
 
 import java.util.List;
 import java.util.Optional;
@@ -44,4 +45,16 @@ public class ComentsJpaGateway implements ComentsGateway {
 
         return comentsJpaRepository.findCommentByTweetId(postJpaEntity);
     }
+
+    @Override
+    public Optional<List<ComentsJpaEntity>> findAllByUserId(UserJpaEntity userJpaEntity){
+        return comentsJpaRepository.findCommentByUserId(userJpaEntity);
+    }
+
+    @Override
+    public void delete(ComentsJpaEntity comentsJpaEntity) {
+        comentsJpaRepository.delete(comentsJpaEntity);
+    }
+
+
 }

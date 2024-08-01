@@ -6,11 +6,13 @@ import meusite.domain.enums.AccountStatus;
 import meusite.repository.user.UserJpaGateWay;
 import meusite.repository.user.exception.UserException;
 import meusite.repository.user.jpa.UserJpaEntity;
+import meusite.repository.verifier.UserVerifierJpaGateway;
 import meusite.repository.verifier.jpa.UserVerifierJpaEntity;
+import meusite.repository.verifier.jpa.UserVerifierRepository;
 import meusite.service.auth.EmailService;
 import meusite.service.auth.exception.AuthException;
 import meusite.service.user.UserService;
-import meusite.service.verifier.UserVerifierService;
+import meusite.service.verifier.implementation.UserVerifierServiceImplementation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -22,20 +24,12 @@ import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
-
 public class UserServiceImplementation implements UserService {
-
-    @Autowired
-    UserVerifierService userVerifierService;
 
     private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Autowired
-    private UserJpaGateWay userJpaGateWay;
-
-    @Autowired
-    EmailService emailService;
-
+    UserJpaGateWay userJpaGateWay;
 
     public static UserServiceImplementation build(UserJpaGateWay userJpaGateWay){
         return new UserServiceImplementation(
@@ -52,7 +46,7 @@ public class UserServiceImplementation implements UserService {
         userJpaGateWay.save(userJpaEntity);
     }
     @Override
-    public void createUser(RegisterRequestDto registerRequestDto){
+    public void createUser(RegisterRequestDto registerRequestDto, UserVerifierServiceImplementation userVerifierService, EmailService emailService){
         passwordEncoder = new BCryptPasswordEncoder();
 
         var aUser = this.findUserByEmail(registerRequestDto.email());
@@ -64,8 +58,8 @@ public class UserServiceImplementation implements UserService {
             throw new AuthException("Voce nao pode criar um usuario com senha ou email vazios !");
         }
         if(
-                this.userVerifierService.getUserVerifierByUserEmail(registerRequestDto.email()).isPresent() &&
-                        this.userVerifierService.getUserVerifierByUserEmail(registerRequestDto.email()).get().getExpires_at().compareTo(Instant.now()) >= 0 ){
+                userVerifierService.getUserVerifierByUserEmail(registerRequestDto.email()).isPresent() &&
+                        userVerifierService.getUserVerifierByUserEmail(registerRequestDto.email()).get().getExpires_at().compareTo(Instant.now()) >= 0 ){
             throw  new AuthException("Seu codigo ainda nao expirou !");
         }
 
@@ -141,7 +135,7 @@ public class UserServiceImplementation implements UserService {
         
     }
     @Override
-    public String ChangePasswordNotLoggedEmail(String email) {
+    public String ChangePasswordNotLoggedEmail(String email, EmailService emailService, UserVerifierServiceImplementation userVerifierService) {
         var anUser = this.findUserByEmail(email);
 
         String code = UUID.randomUUID().toString();
@@ -150,20 +144,28 @@ public class UserServiceImplementation implements UserService {
             throw new UserException("Não é possivel alterar sua senha: Seu cadastro não existe !");
         }
 
-        this.userJpaGateWay.changeId(email,code);
+        var aVerifier =  userVerifierService.getUserVerifierByUserEmail(email);
+
+        if(
+                aVerifier.isPresent() &&
+                       aVerifier.get().getExpires_at().compareTo(Instant.now()) >= 0 ){
+            throw  new AuthException("Seu codigo ainda nao expirou !");
+        }
+
+
+        UserVerifierJpaEntity userVerifierJpaEntity = new UserVerifierJpaEntity(
+                email, anUser.get().getPassword(), Instant.now().plusMillis(6000000),AccountStatus.PENDING,code);
+
+        try{
+            userVerifierService.save(userVerifierJpaEntity);
+        }catch (IllegalArgumentException e){
+            throw new UserException(e.getMessage());
+        }catch(OptimisticLockingFailureException e) {
+            throw new UserException((e.getMessage()));
+        }
 
         emailService.sendEmail(email, "Mudança de senha",code + " Aqui esta seu codigo !");
         return "Senha alterada com sucesso !";
-    }
-    @Override
-    public UserJpaEntity verifierCode(String code){
-        var anUser = this.userJpaGateWay.findById(code);
-
-        if(anUser.isEmpty()){
-            throw new UserException("Codigo invalido ou incorreto !");
-        }
-        return anUser.get();
-
     }
     @Override
     public String ChangePasswordNotLogged(UserJpaEntity userJpaEntity, String password){
@@ -182,21 +184,36 @@ public class UserServiceImplementation implements UserService {
         return "Senha alterada com sucesso !";
     }
     @Override
-    public String validateRegister(String code){
+    public UserJpaEntity verifierCode(String code,UserVerifierServiceImplementation userVerifierServiceImplementation){
 
+
+        var aUserVerifier = userVerifierServiceImplementation.getUserVerifierByCode(code);
+
+        var anUser = this.userJpaGateWay.findByEmail(aUserVerifier.get().getUserEmail());
+
+        if(aUserVerifier.isEmpty()){
+            throw new UserException("Codigo invalido ou incorreto !");
+        }
+        userVerifierServiceImplementation.delete(aUserVerifier.get());
+
+        return anUser.get();
+
+    }
+    @Override
+    public String validateRegister(String code, UserVerifierServiceImplementation userVerifierService){
         ZoneId zoneId = ZoneId.systemDefault();
 
         Instant instant = Instant.now();
 
         ZonedDateTime zonedDateTime = instant.atZone(zoneId);
 
-        var userVerifier = this.userVerifierService.getUserVerifierByCode(code);
+        var userVerifier = userVerifierService.getUserVerifierByCode(code);
 
         if(userVerifier.isEmpty()){
             throw new UserException("Codigo invalido , nao existe nenhum login com este codigo!");
         }
         if(userVerifier.get().getExpires_at().compareTo(Instant.now()) <=0){
-            this.userVerifierService.delete(userVerifier.get());
+            userVerifierService.delete(userVerifier.get());
             throw new UserException("Seu codigo de validação expirou!");
         }
 
@@ -209,12 +226,13 @@ public class UserServiceImplementation implements UserService {
         anUser.setFollowing(0);
         anUser.setFollowes(0);
 
-        this.userVerifierService.delete(userVerifier.get());
+
 
         var userEntity = UserJpaEntity.from(anUser);
 
         try{
-            this.userJpaGateWay.save(userEntity);;
+            this.userJpaGateWay.save(userEntity);
+            userVerifierService.delete(userVerifier.get());
         }catch (IllegalArgumentException e){
             throw new UserException(e.getMessage());
         }catch(OptimisticLockingFailureException e) {
