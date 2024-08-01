@@ -58,18 +58,20 @@ export default function PostSplited({
     return (
     <div className="container p-2 mt-4 rounded-xl space-y-5 bg-gray-400 min-h-screen">
         <div className="container mt-8 items-center rounded-md">
-            <div className="container mt-5 flex-col flex space-y-16 max-w-screen-md h-60 pb-3 bg-gray-700 rounded-md border-stone-950 border-2">
+            
+            <div className="container mt-5 flex-col flex space-y-10 max-w-screen-md h-60 pb-3 bg-gray-700 rounded-md border-stone-950 border-2">
+               
                 <strong className="">{postt.userEmail}</strong>
                 <p className="text-slate-300">{postt.content}</p>
+                <p className="text-right">{postt.postedAt}</p>
 
-                <div className="text-left items-row flex gap-8">
+                <p className="text-left items-row flex gap-8">
                     <LikeContainerPost post={postt} initialIsLiked={isPostLikedByUser(postt.tweet_id)} />
                     <CommentContainer ncomments={postt.ncoments} postId={params.postId} />
-                </div>
-
+                </p>
                
                     {comments.map((comment) => (
-                         <div className="container  flex flex-col gap-4 bg-gray-700 rounded-md border-stone-950 border-2 max-h-max  pb-15" >
+                         <div className="container flex flex-col gap-4 bg-gray-700 rounded-md border-stone-950 border-2 max-h-max  pb-15" >
                         <ul key={comment.comentId}>
                             <li className="space-y-10">
                                 <p className="font-bold">{comment.userEmail}</p>
